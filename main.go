@@ -148,6 +148,36 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 		return
 	}
 
+	// Point local brancht at remote
+	remTree, err := repo.LookupTree(remoteRef.Target())
+	if err != nil {
+		http500(fmt.Sprintf("could not lookup remote tree: %s", err))
+		return
+	}
+
+	if err := repo.CheckoutTree(remTree, nil); err != nil {
+		http500(fmt.Sprintf("could not checkout remote tree: %s", err))
+		return
+	}
+
+	head, err := repo.Head()
+	if err != nil {
+		http500(fmt.Sprintf("could not get head: %s", err))
+		return
+	}
+
+	localBranch, err := repo.LookupReference("refs/heads/master")
+	if err != nil {
+		http500(fmt.Sprintf("could not lookup local master: %s", err))
+		return
+	}
+
+	localBranch.SetTarget(remoteRef.Target(), nil, "")
+	if _, err := head.SetTarget(remoteRef.Target(), nil, ""); err != nil {
+		http500(fmt.Sprintf("could not set target: %s", err))
+		return
+	}
+
 	repo.StateCleanup()
 
 	log.Printf("repository '%s' updated.\n", filepath.Join(c.HookPath, r.URL.Path))
