@@ -155,6 +155,8 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 }
 
 func main() {
+	flag.Parse()
+
 	// taken from ascii-code.com
 	fmt.Println(strings.Replace(`                                    ,-="""=.
                                   .'        ;.
