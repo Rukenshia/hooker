@@ -149,6 +149,8 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 		return
 	}
 
+	repo.StateCleanup()
+
 	log.Printf("repository '%s' updated.\n", filepath.Join(c.HookPath, r.URL.Path))
 	w.WriteHeader(200)
 	w.Write([]byte("ok"))
