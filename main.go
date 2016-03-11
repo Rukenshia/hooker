@@ -57,7 +57,6 @@ func unmarshalPayload(r io.Reader) (Ref, error) {
 		return nil, err
 	}
 
-	log.Println(string(data))
 	// Try BitBucket first
 	var b BitbucketWebhook
 	if err = json.Unmarshal(data, &b); err == nil {
@@ -89,7 +88,7 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 
 	f, err := os.Stat(filepath.Join(c.HookPath, r.URL.Path))
 	if err != nil {
-		log.Printf("invalid repository '%s'\n", filepath.Join(c.HookPath, r.URL.Path))
+		log.Printf("invalid repository '%s': %s\n", filepath.Join(c.HookPath, r.URL.Path), err)
 		http.Error(w, "404", http.StatusNotFound)
 		return
 	}
