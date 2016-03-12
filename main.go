@@ -136,6 +136,7 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 		http500(fmt.Sprintf("could not lookup 'refs/remotes/origin/master': %s", err))
 		return
 	}
+	remoteTarget := remoteRef.Target()
 
 	remHead, err := repo.AnnotatedCommitFromRef(remoteRef)
 	if err != nil {
@@ -149,13 +150,19 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 	}
 
 	// Point local brancht at remote
-	remTree, err := repo.LookupTree(remoteRef.Target())
+	remCommit, err := repo.LookupCommit(remoteTarget)
+	if err != nil {
+		http500(fmt.Sprintf("could not lookup commit on remote: %s", err))
+		return
+	}
+	
+	remTree, err := remCommit.Tree() 
 	if err != nil {
 		http500(fmt.Sprintf("could not lookup remote tree: %s", err))
 		return
 	}
 
-	if err := repo.CheckoutTree(remTree, nil); err != nil {
+	if err := repo.CheckoutTree(remTree, &git.CheckoutOpts{ Strategy: git.CheckoutForce }); err != nil {
 		http500(fmt.Sprintf("could not checkout remote tree: %s", err))
 		return
 	}
@@ -172,11 +179,8 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 		return
 	}
 
-	localBranch.SetTarget(remoteRef.Target(), nil, "")
-	if _, err := head.SetTarget(remoteRef.Target(), nil, ""); err != nil {
-		http500(fmt.Sprintf("could not set target: %s", err))
-		return
-	}
+	localBranch.SetTarget(remoteTarget, nil, "")
+	head.SetTarget(remoteTarget, nil, "")
 
 	repo.StateCleanup()
 
