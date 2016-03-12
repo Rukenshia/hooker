@@ -34,15 +34,15 @@ type Ref interface {
 	Ref() string
 }
 
-// BitbucketWebhook stripped down to the bare minimum
-type BitbucketWebhook struct {
+// BitbucketServerWebhook stripped down to the bare minimum
+type BitbucketServerWebhook struct {
 	RefChanges []struct {
 		RefID string `json:"refId"`
 	} `json:"refChanges"`
 }
 
 // Ref Returns the Ref of the Change
-func (b BitbucketWebhook) Ref() string {
+func (b BitbucketServerWebhook) Ref() string {
 	for _, r := range b.RefChanges {
 		if r.RefID == "refs/heads/master" {
 			return "refs/heads/master"
@@ -58,7 +58,7 @@ func unmarshalPayload(r io.Reader) (Ref, error) {
 	}
 
 	// Try BitBucket first
-	var b BitbucketWebhook
+	var b BitbucketServerWebhook
 	if err = json.Unmarshal(data, &b); err == nil {
 		return b, nil
 	}
@@ -155,14 +155,14 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 		http500(fmt.Sprintf("could not lookup commit on remote: %s", err))
 		return
 	}
-	
-	remTree, err := remCommit.Tree() 
+
+	remTree, err := remCommit.Tree()
 	if err != nil {
 		http500(fmt.Sprintf("could not lookup remote tree: %s", err))
 		return
 	}
 
-	if err := repo.CheckoutTree(remTree, &git.CheckoutOpts{ Strategy: git.CheckoutForce }); err != nil {
+	if err := repo.CheckoutTree(remTree, &git.CheckoutOpts{Strategy: git.CheckoutForce}); err != nil {
 		http500(fmt.Sprintf("could not checkout remote tree: %s", err))
 		return
 	}
