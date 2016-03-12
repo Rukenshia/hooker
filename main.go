@@ -57,12 +57,12 @@ func unmarshalPayload(r io.Reader) (Ref, error) {
 		return nil, err
 	}
 
-	// Try BitBucket first
-	var b BitbucketServerWebhook
-	if err = json.Unmarshal(data, &b); err == nil {
-		return b, nil
+	services := []interface{}{&BitbucketServerWebhook{}}
+	for _, s := range services {
+		if err := json.Unmarshal(data, &s); err == nil {
+			return s.(Ref), nil
+		}
 	}
-
 	return nil, err
 }
 
