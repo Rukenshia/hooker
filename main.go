@@ -69,7 +69,6 @@ func unmarshalPayload(r io.Reader) (Ref, error) {
 		return nil, err
 	}
 
-	log.Println(string(data))
 	services := []interface{}{&BitbucketServerWebhook{}, &GitLabWebhook{}}
 	for _, s := range services {
 		if err := json.Unmarshal(data, &s); err == nil {

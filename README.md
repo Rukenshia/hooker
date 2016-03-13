@@ -23,9 +23,13 @@
 `""'""                               `"""""""
 ```
 # Hooker
-Hooker is a tool to automatically update `BitBucket Server` repositories using a `POST Webhook`.
+Hooker is a tool to automatically update git repositories using a `POST Webhook`.
 
 The master branch (fetched from `refs/remotes/origin/master`) gets updated only.
+
+## Supported Git Services
+* GitLab
+* Bitbucket Server
 
 ## Configuration
 The configuration is a simple toml file (`config.toml` by default, can be overriden using the `--config=PATH` flag).
