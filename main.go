@@ -41,6 +41,11 @@ type BitbucketServerWebhook struct {
 	} `json:"refChanges"`
 }
 
+// GitLabWebhook, also just the bare minimum
+type GitLabWebhook struct {
+	ref string `json:"ref"`
+}
+
 // Ref Returns the Ref of the Change
 func (b BitbucketServerWebhook) Ref() string {
 	for _, r := range b.RefChanges {
@@ -51,13 +56,19 @@ func (b BitbucketServerWebhook) Ref() string {
 	return "not master"
 }
 
+// Ref returns the Ref of the change
+func (w GitLabWebhook) Ref() string {
+	return w.ref
+}
+
 func unmarshalPayload(r io.Reader) (Ref, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
-	services := []interface{}{&BitbucketServerWebhook{}}
+	log.Println(string(data))
+	services := []interface{}{&BitbucketServerWebhook{}, &GitLabWebhook{}}
 	for _, s := range services {
 		if err := json.Unmarshal(data, &s); err == nil {
 			return s.(Ref), nil
