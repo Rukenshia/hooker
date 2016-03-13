@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var (
@@ -28,6 +29,7 @@ type Config struct {
 }
 
 var c Config
+var mutex = &sync.Mutex{}
 
 // Ref Interface to support different webhooks
 type Ref interface {
@@ -96,6 +98,8 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 	}
 
 	log.Printf("updating repository '%s'\n", filepath.Join(c.HookPath, r.URL.Path))
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	f, err := os.Stat(filepath.Join(c.HookPath, r.URL.Path))
 	if err != nil {
