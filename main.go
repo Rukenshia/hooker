@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/BurntSushi/toml"
@@ -45,7 +46,7 @@ type BitbucketServerWebhook struct {
 
 // GitLabWebhook, also just the bare minimum
 type GitLabWebhook struct {
-	ref string `json:"ref"`
+	RefValue string `json:"ref"`
 }
 
 // Ref Returns the Ref of the Change
@@ -55,12 +56,12 @@ func (b BitbucketServerWebhook) Ref() string {
 			return "refs/heads/master"
 		}
 	}
-	return "not master"
+	return ""
 }
 
 // Ref returns the Ref of the change
 func (w GitLabWebhook) Ref() string {
-	return w.ref
+	return w.RefValue
 }
 
 func unmarshalPayload(r io.Reader) (Ref, error) {
@@ -69,14 +70,17 @@ func unmarshalPayload(r io.Reader) (Ref, error) {
 		return nil, err
 	}
 
-	log.Println(string(data))
 	services := []interface{}{&BitbucketServerWebhook{}, &GitLabWebhook{}}
 	for _, s := range services {
 		if err := json.Unmarshal(data, &s); err == nil {
-			return s.(Ref), nil
+			ref, _ := s.(Ref)
+			if len(ref.Ref()) == 0 {
+				continue
+			}
+			return ref, nil
 		}
 	}
-	return nil, err
+	return nil, errors.New("unknown webhook")
 }
 
 func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
