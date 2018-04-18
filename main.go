@@ -5,17 +5,16 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/julienschmidt/httprouter"
-	"gopkg.in/libgit2/git2go.v22"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
+
+	"github.com/BurntSushi/toml"
+	"github.com/julienschmidt/httprouter"
 )
 
 var (
@@ -211,29 +210,6 @@ func handleWebhook(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 func main() {
 	flag.Parse()
 
-	// taken from ascii-code.com
-	fmt.Println(strings.Replace(`                                    ,-="""=.
-                                  .'        ;.
-                                 (            ;.
-                                  ;.            ;..
-                                   ,'             .'
-                                   ;.            '.
-                                     ;-.           ;-.
-                                        )             ;=-.
-                                      .'              ;=-.
-                                    .;               .;-.
-                      _            (                \ ;-.
-                   ,'   ;.          ;.        /;.    \
-                  /        ;.         \      |   ;.   ;.
-                ,'            ;.       )    /      \    \
-               /     .';.        ;.    )    |       ;.   \
-             ,'    .'    ;.         ;./     \         ;.  \
-           ,'    .'        ;.                \          \  \
-         ,'    .'            ;.               \          ;. \
-       ,'   .'                 ;.              )          ) (__.
-     ,'   (                      ;.            )          ;."""'
- _.-'    __)                       ;.         .
-;""'""                               ;"""""""`, ";", "`", -1))
 	fmt.Println("")
 	fmt.Println("                  hooker - bitbucket webhook deployment")
 	fmt.Println()
